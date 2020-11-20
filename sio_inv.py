@@ -5,25 +5,29 @@ import os
 import six
 from six.moves import configparser
 import json
+import requests
+
 
 class SioInventoryModule():
-
-    def _empty_inventory(self):
-        return {"_meta": {"hostvars": {}}}
 
     def __init__(self):
         ''' Main execution path '''
 
-        self.inventory = self._empty_inventory()
-
+        self.inventory = {"_meta": {"hostvars": {}}}
+        self.siodb_REST_protocol = "https"
         self.siodb_REST_IP = None
-        self.siodb_REST_PORT = None
-        self.siodb_REST_USER = None
-        self.siodb_REST_TOKEN = None
+        self.siodb_REST_port = None
+        self.siodb_REST_user = None
+        self.siodb_REST_token = None
+        self.siodb_REST_TLS_verify_certificate = None
 
         # Read settings and parse CLI arguments
         self.parse_cli_args()
         self.read_settings()
+
+        # Build inventory
+        self.build_inventory()
+        self.print_inventory()
 
     def parse_cli_args(self):
         ''' Command line argument processing '''
@@ -47,13 +51,95 @@ class SioInventoryModule():
 
         config.read(sio_ini_path)
 
-        if not config.has_option('sio_inv', 'siodb_rest_ip'):
+        if config.has_option('sio_inv', 'siodb_rest_ip'):
+            self.siodb_REST_IP = config.get('sio_inv', 'siodb_rest_ip')
+        else:
             self.siodb_REST_IP = "localhost"
-        if not config.has_option('sio_inv', 'siodb_rest_port'):
-            self.siodb_REST_PORT = "50443"
-        if not config.has_option('sio_inv', 'siodb_rest_user'):
-            self.siodb_REST_USER = "sioinv"
-        if not config.has_option('sio_inv', 'siodb_rest_token'):
-            self.siodb_REST_TOKEN = none
+
+        if config.has_option('sio_inv', 'siodb_rest_port'):
+            self.siodb_REST_port = config.get('sio_inv', 'siodb_rest_port')
+        else:
+            self.siodb_REST_port = "50443"
+
+        if config.has_option('sio_inv', 'siodb_rest_user'):
+            self.siodb_REST_user = config.get('sio_inv', 'siodb_rest_user')
+        else:
+            self.siodb_REST_user = "sioinv"
+
+        if config.has_option('sio_inv', 'siodb_rest_token'):
+            self.siodb_REST_token = config.get('sio_inv', 'siodb_rest_token')
+        else:
+            self.siodb_REST_token = none
+
+        if config.has_option('sio_inv', 'siodb_rest_tls_verify_certificate'):
+            if config.get('sio_inv', 'siodb_rest_tls_verify_certificate') == "yes":
+                self.siodb_REST_TLS_verify_certificate = True
+            else:
+                self.siodb_REST_TLS_verify_certificate = False
+        else:
+            self.siodb_REST_TLS_verify_certificate = True
+
+
+    def get_url(self, table_name):
+
+        url = '{}://{}:{}@{}:{}/databases/sioinv/tables/{}/rows'.format(
+                            self.siodb_REST_protocol,
+                            self.siodb_REST_user,
+                            self.siodb_REST_token,
+                            self.siodb_REST_IP,
+                            self.siodb_REST_port,
+                            table_name
+                            )
+
+        response = requests.get(url, verify = self.siodb_REST_TLS_verify_certificate)
+        if response.status_code != 200:
+            print('ERROR GET {}'.format(response.status_code))
+
+        print(response.json())
+
+        return response.json()
+
+    def build_inventory(self):
+
+        self.add_group_to_inventory()
+
+    def print_inventory(self):
+
+        print(self.inventory)
+
+    def add_group_to_inventory(self):
+
+        response_json = self.get_url("groups")
+
+        for group in response_json["rows"]:
+            self.add_hosts_to_group(group["TRID"], group["NAME"])
+
+    def add_hosts_to_group(self, group_trid, group_name):
+
+        host_list = []
+
+        response_json = self.get_url("hosts")
+
+        for host in response_json["rows"]:
+            print("{} {} {}".format(host["TRID"], host["GROUP_ID"], host["NAME"]))
+            if host["GROUP_ID"] == group_trid:
+              host_list.append(host["NAME"])
+              self.add_vars_to_hosts(host["TRID"], host["NAME"])
+
+        self.inventory[group_name] = host_list
+
+    def add_vars_to_hosts(self, host_trid, host_name):
+
+        hostvars = {}
+
+        response_json = self.get_url("hosts_variables")
+
+        for hostvar in response_json["rows"]:
+            print("{} {} {}".format(hostvar["TRID"], hostvar["HOST_ID"], hostvar["NAME"], hostvar["VALUE"]))
+            if hostvar["HOST_ID"] == host_trid:
+                hostvars[hostvar["NAME"]] = hostvar["VALUE"]
+
+        self.inventory["_meta"]["hostvars"][host_name] = hostvars
+
 
 SioInventoryModule()
