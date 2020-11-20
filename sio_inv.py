@@ -6,7 +6,7 @@ import six
 from six.moves import configparser
 import json
 
-class InventoryModule():
+class SioInventoryModule():
 
     def _empty_inventory(self):
         return {"_meta": {"hostvars": {}}}
@@ -40,18 +40,12 @@ class InventoryModule():
     def read_settings(self):
         ''' Reads the settings from the sio_inv.ini file '''
 
-        print(__file__)
-        print(os.path.basename(__file__))
-
         config = configparser.ConfigParser()
-        ec2_ini_path = os.environ.get('SIO_INV_INI_PATH',
+        sio_ini_path = os.environ.get('SIO_INV_INI_PATH',
             os.path.join(os.path.dirname(__file__), 'sio_inv.ini'))
-        ec2_ini_path = os.path.expanduser(os.path.expandvars(ec2_ini_path))
+        sio_ini_path = os.path.expanduser(os.path.expandvars(sio_ini_path))
 
-        if not os.path.isfile(ec2_ini_path):
-            ec2_ini_path = os.path.expanduser(defaults['ec2']['ini_fallback'])
-
-        config.read(ec2_ini_path)
+        config.read(sio_ini_path)
 
         if not config.has_option('sio_inv', 'siodb_rest_ip'):
             self.siodb_REST_IP = "localhost"
@@ -62,4 +56,4 @@ class InventoryModule():
         if not config.has_option('sio_inv', 'siodb_rest_token'):
             self.siodb_REST_TOKEN = none
 
-InventoryModule()
+SioInventoryModule()
