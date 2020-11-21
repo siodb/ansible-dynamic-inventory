@@ -103,6 +103,7 @@ class SioInventoryModule():
     def build_inventory(self):
 
         self.add_group_to_inventory()
+        self.add_hosts_to_all()
 
     def print_inventory(self):
 
@@ -114,6 +115,7 @@ class SioInventoryModule():
         response_json = self.get_url("groups")
 
         for group in response_json["rows"]:
+            self.inventory[group["NAME"]] = { "hosts": [], "vars": {} }
             self.add_vars_to_group(group["TRID"], group["NAME"])
             if group["NAME"].lower() != "all":
                 self.add_hosts_to_group(group["TRID"], group["NAME"])
@@ -128,10 +130,23 @@ class SioInventoryModule():
             #print("{} {} {}".format(host["TRID"], host["GROUP_ID"], host["NAME"]))
             if host["GROUP_ID"] == group_trid:
               host_list.append(host["NAME"])
-              self.add_vars_to_host(host["TRID"], host["NAME"])
 
         if len(host_list) > 0:
-            self.inventory[group_name] = { "hosts": host_list }
+            self.inventory[group_name]["hosts"] = host_list
+
+    def add_hosts_to_all(self):
+
+        host_list = []
+
+        response_json = self.get_url("hosts")
+
+        for host in response_json["rows"]:
+            #print("{} {} {}".format(host["TRID"], host["GROUP_ID"], host["NAME"]))
+            host_list.append(host["NAME"])
+            self.add_vars_to_host(host["TRID"], host["NAME"])
+
+        if len(host_list) > 0:
+            self.inventory["all"]["hosts"] = host_list
 
     def add_vars_to_host(self, host_trid, host_name):
 
@@ -149,16 +164,16 @@ class SioInventoryModule():
 
     def add_vars_to_group(self, group_trid, group_name):
 
-        groupvars = []
+        groupvars = {}
 
         response_json = self.get_url("groups_variables")
 
         for groupvar in response_json["rows"]:
-            print("{} {} {} {}".format(groupvar["TRID"], groupvar["GROUP_ID"], groupvar["NAME"], groupvar["VALUE"]))
+            #print("{} {} {} {}".format(groupvar["TRID"], groupvar["GROUP_ID"], groupvar["NAME"], groupvar["VALUE"]))
             if groupvar["GROUP_ID"] == group_trid:
-                groupvars.append( { groupvar["NAME"]:  groupvar["VALUE"] } )
+                groupvars[groupvar["NAME"]] = groupvar["VALUE"]
 
         if len(groupvars) > 0 :
-            self.inventory[group_name] = { "vars": groupvars }
+            self.inventory[group_name]["vars"] = groupvars
 
 SioInventoryModule()
