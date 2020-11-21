@@ -6,13 +6,14 @@ import six
 from six.moves import configparser
 import json
 import requests
-
+import urllib3
 
 class SioInventoryModule():
 
     def __init__(self):
         ''' Main execution path '''
 
+        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         self.inventory = {"_meta": {"hostvars": {}}}
         self.siodb_REST_protocol = "https"
         self.siodb_REST_IP = None
@@ -95,7 +96,7 @@ class SioInventoryModule():
         if response.status_code != 200:
             print('ERROR GET {}'.format(response.status_code))
 
-        print(response.json())
+        #print(response.json())
 
         return response.json()
 
@@ -105,14 +106,17 @@ class SioInventoryModule():
 
     def print_inventory(self):
 
-        print(self.inventory)
+        json_inventory = json.dumps(self.inventory, sort_keys=True)
+        print(json_inventory)
 
     def add_group_to_inventory(self):
 
         response_json = self.get_url("groups")
 
         for group in response_json["rows"]:
-            self.add_hosts_to_group(group["TRID"], group["NAME"])
+            self.add_vars_to_group(group["TRID"], group["NAME"])
+            if group["NAME"].lower() != "all":
+                self.add_hosts_to_group(group["TRID"], group["NAME"])
 
     def add_hosts_to_group(self, group_trid, group_name):
 
@@ -121,25 +125,40 @@ class SioInventoryModule():
         response_json = self.get_url("hosts")
 
         for host in response_json["rows"]:
-            print("{} {} {}".format(host["TRID"], host["GROUP_ID"], host["NAME"]))
+            #print("{} {} {}".format(host["TRID"], host["GROUP_ID"], host["NAME"]))
             if host["GROUP_ID"] == group_trid:
               host_list.append(host["NAME"])
-              self.add_vars_to_hosts(host["TRID"], host["NAME"])
+              self.add_vars_to_host(host["TRID"], host["NAME"])
 
-        self.inventory[group_name] = host_list
+        if len(host_list) > 0:
+            self.inventory[group_name] = { "hosts": host_list }
 
-    def add_vars_to_hosts(self, host_trid, host_name):
+    def add_vars_to_host(self, host_trid, host_name):
 
         hostvars = {}
 
         response_json = self.get_url("hosts_variables")
 
         for hostvar in response_json["rows"]:
-            print("{} {} {}".format(hostvar["TRID"], hostvar["HOST_ID"], hostvar["NAME"], hostvar["VALUE"]))
+            #print("{} {} {}".format(hostvar["TRID"], hostvar["HOST_ID"], hostvar["NAME"], hostvar["VALUE"]))
             if hostvar["HOST_ID"] == host_trid:
                 hostvars[hostvar["NAME"]] = hostvar["VALUE"]
 
-        self.inventory["_meta"]["hostvars"][host_name] = hostvars
+        if len(hostvars) > 0 :
+            self.inventory["_meta"]["hostvars"][host_name] = hostvars
 
+    def add_vars_to_group(self, group_trid, group_name):
+
+        groupvars = []
+
+        response_json = self.get_url("groups_variables")
+
+        for groupvar in response_json["rows"]:
+            print("{} {} {} {}".format(groupvar["TRID"], groupvar["GROUP_ID"], groupvar["NAME"], groupvar["VALUE"]))
+            if groupvar["GROUP_ID"] == group_trid:
+                groupvars.append( { groupvar["NAME"]:  groupvar["VALUE"] } )
+
+        if len(groupvars) > 0 :
+            self.inventory[group_name] = { "vars": groupvars }
 
 SioInventoryModule()
