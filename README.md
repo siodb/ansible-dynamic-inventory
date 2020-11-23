@@ -25,6 +25,10 @@ sudo -i -u siodb siocli --user root < sio_inv_user.sql
 
 3. Create your groups, groupvars, hosts and hostvars:
 
+```bash
+sudo -i -u siodb siocli --user root
+```
+
 ```sql
 insert into groups
 values
