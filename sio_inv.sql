@@ -12,13 +12,14 @@ add token python_inv_script ;
 
 use database sys
 ;
--- drop database sioinv ;
+drop database sioinv
+;
 create database sioinv ;
 use database sioinv
 ;
 
 -- Groups table
-create table groups
+create table groups2
 (
     name text
 );
@@ -70,11 +71,13 @@ values
 
 insert into hosts
 values
-    ( 2, 'server-01' ),
-    ( 3, 'server-02' ),
-    ( 4, 'server-03' ),
+    ( 1, 'server-01' ),
+    ( 2, 'server-02' ),
+    ( 3, 'server-03' ),
     ( 2, 'server-04' ),
-    ( 3, 'server-05' )
+    ( 4, 'server-05' ),
+    ( 1, 'hypervisor-01' ),
+    ( 2, 'hypervisor-02' )
 ;
 
 insert into hosts_variables
