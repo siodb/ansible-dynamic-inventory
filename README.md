@@ -11,6 +11,7 @@ specific code to create a runtime group (e.g. `add_host` module). Or you may
 want to update the inventory on the fly without having to wait for an async mechanism
 to be triggered. This all this project is about: providing you a simple, fully
 encrypted, interactive dynamic inventory made to measure for your environment.
+
 ## Install the backend data model
 
 1. [Install the database](https://siodb.io/getsiodb)
