@@ -136,6 +136,6 @@ $ ansible-inventory -i ./sio_inv.py  --graph --vars
 The file `test_sio_inv.yml` in this repositry is a playbook that demontrate
 how to use the custom inventory:
 
-````bash
+```bash
 ansible-playbook -i sio_inv.py test_sio_inv.yml -e vm_name=server-06
 ```
