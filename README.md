@@ -1,4 +1,4 @@
-# ansible-dynamic-inventory
+# Ansible Custom Interactive Dynamic Inventory
 
 Custom and interactive inventory for Ansible.
 
