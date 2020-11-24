@@ -18,7 +18,7 @@ encrypted, interactive dynamic inventory made to measure for your environment.
 2. Create the inventory data model and the database user:
 
 ```bash
-git clone git@github.com:siodb/ansible-dynamic-inventory.git
+git clone https://github.com/siodb/ansible-dynamic-inventory.git
 cd ansible-dynamic-inventory
 sudo -i -u siodb siocli --user root < sio_inv_data_model.sql
 sudo -i -u siodb siocli --user root < sio_inv_user.sql
@@ -31,6 +31,7 @@ sudo -i -u siodb siocli --user root
 ```
 
 ```sql
+use database sioinv ;
 insert into groups
 values
     ( 'production' ),
@@ -52,7 +53,7 @@ insert into hosts
 values
     ( 2, 'server-01', CURRENT_TIMESTAMP ),
     ( 3, 'server-02', CURRENT_TIMESTAMP ),
-    ( 4, 'server-03', CURRENT_TIMESTAMP ),
+    ( 4, 'server-03', CURRENT_TIMESTAMP )
 ;
 
 insert into hosts_variables

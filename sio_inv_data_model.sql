@@ -4,8 +4,6 @@
 
 use database sys
 ;
-drop database sioinv
-;
 create database sioinv ;
 use database sioinv
 ;
