@@ -12,7 +12,7 @@
         url: https://localhost:50443/databases/sioinv/tables/hosts/rows
         validate_certs: false
         user: sioinv
-        password: adc9b6ffb69454c4dc5e6443beb0412b0e848f510792eb956a3b09451f8906af3a55bc641e368c7dd633bdb95a1e17370142908a32946aa41b79e3c74e8d0295
+        password: "{{ sioinv_user_token }}"
         method: POST
         body: >
           [{
@@ -28,7 +28,7 @@
         url: https://localhost:50443/databases/sioinv/tables/hosts_variables/rows
         validate_certs: false
         user: sioinv
-        password: adc9b6ffb69454c4dc5e6443beb0412b0e848f510792eb956a3b09451f8906af3a55bc641e368c7dd633bdb95a1e17370142908a32946aa41b79e3c74e8d0295
+        password: "{{ sioinv_user_token }}"
         method: POST
         body: >
           [{
@@ -43,15 +43,11 @@
     - name: Force Ansible to refresh its inventory to include the new VM
       meta: refresh_inventory
 
-- name: "Full Stack Service creation"
+- name: Full Stack Service creation
   hosts: "{{ vm_name }}"
   tasks:
 
     - name: Create the new database on the new VM
       shell: >
         echo "Module or command to create a new database on {{ vm_name }}"
-
-
-
-
 

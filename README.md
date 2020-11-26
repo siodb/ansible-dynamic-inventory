@@ -77,7 +77,7 @@ by configuring the file `sio_inv.ini`:
 siodb_rest_ip = localhost
 siodb_rest_port = 50443
 siodb_rest_user = sioinv
-siodb_rest_token = <token-generated-from-scrip-sio_inv_user.sql>
+siodb_rest_token = <token-generated-from-script-sio_inv_user.sql>
 siodb_rest_tls_verify_certificate = no
 ```
 
