@@ -12,76 +12,28 @@ want to update the inventory on the fly without having to wait for an async mech
 to be triggered. This all this project is about: providing you a simple, fully
 encrypted, interactive dynamic inventory made to measure for your environment.
 
-## Install the backend data model
+## Get the backend database
 
-1. [Install the database](https://siodb.io/getsiodb)
-2. Create the inventory data model and the database user:
+1. Clone the data model in the [DataHub](https://datahub.siodb.io/niolap/u3_ansible/clone)
+2. Clone the inventory:
 
 ```bash
 git clone https://github.com/siodb/ansible-dynamic-inventory.git
-cd ansible-dynamic-inventory
-sudo -i -u siodb siocli --user root < sio_inv_data_model.sql
-sudo -i -u siodb siocli --user root < sio_inv_user.sql
-```
-
-3. Create your groups, groupvars, hosts and hostvars:
-
-```bash
-sudo -i -u siodb siocli --user root
-```
-
-```sql
-use database sioinv ;
-insert into groups
-values
-    ( 'production' ),
-    ( 'test' ),
-    ( 'development' )
-;
-insert into groups_variables
-values
-    ( 1, 'domain_name', 'company.com' ),
-    ( 2, 'environment_name', 'production' ),
-    ( 2, 'subnet', '10.10.0.0/16' ),
-    ( 3, 'environment_name', 'test' ),
-    ( 3, 'subnet', '10.20.0.0/16' ),
-    ( 4, 'environment_name', 'development' ),
-    ( 4, 'subnet', '10.30.0.0/16' )
-;
-
-insert into hosts
-values
-    ( 2, 'server-01', CURRENT_TIMESTAMP ),
-    ( 3, 'server-02', CURRENT_TIMESTAMP ),
-    ( 4, 'server-03', CURRENT_TIMESTAMP )
-;
-
-insert into hosts_variables
-values
-    ( 1, 'public_ip', '0.1.2.3' ),
-    ( 1, 'application', 'app01' ),
-    ( 2, 'public_ip', '0.1.2.4' ),
-    ( 2, 'application', 'app02' ),
-    ( 3, 'public_ip', '0.1.2.4' ),
-    ( 3, 'application', 'app02' )
-;
 ```
 
 ## Configure the inventory
 
-You must tell the inventory script where to lookup for its data. That is done
-by configuring the file `sio_inv.ini`:
+You must tell the inventory script where to lookup for its data your
+DataHub API token. You can do this by configuring the file `sio_inv.ini`:
 
 ```ini
 [sio_inv]
-siodb_rest_ip = localhost
+siodb_rest_ip = sdh0001.siodb.io
 siodb_rest_port = 50443
-siodb_rest_user = sioinv
-siodb_rest_token = <token-generated-from-script-sio_inv_user.sql>
-siodb_rest_tls_verify_certificate = no
+siodb_rest_user = niolap
+siodb_rest_token = <your-token-from-the-datahub>
+siodb_rest_tls_verify_certificate = yes
 ```
-
-Note: how to generate new token [here](https://docs.siodb.io/authentication/#rest-api-access).
 
 ## Validate the inventory
 
