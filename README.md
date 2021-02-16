@@ -12,6 +12,7 @@ want to update the inventory on the fly without having to wait for an async mech
 to be triggered. This all this project is about: providing you a simple, fully
 encrypted, interactive dynamic inventory made to measure for your environment.
 The data model is hosted [here](https://datahub.siodb.io/niolap/u3_ansible).
+
 ## Get the backend database
 
 1. Clone the data model in the [DataHub](https://datahub.siodb.io/niolap/u3_ansible/clone)
