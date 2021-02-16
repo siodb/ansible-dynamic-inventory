@@ -18,6 +18,7 @@ class SioInventoryModule():
         self.siodb_REST_protocol = "https"
         self.siodb_REST_IP = None
         self.siodb_REST_port = None
+        self.siodb_REST_database_name = None
         self.siodb_REST_user = None
         self.siodb_REST_token = None
         self.siodb_REST_TLS_verify_certificate = None
@@ -62,6 +63,11 @@ class SioInventoryModule():
         else:
             self.siodb_REST_port = "50443"
 
+        if config.has_option('sio_inv', 'siodb_rest_database_name'):
+            self.siodb_REST_database_name = config.get('sio_inv', 'siodb_rest_database_name')
+        else:
+            self.siodb_REST_port = "sioinv"
+
         if config.has_option('sio_inv', 'siodb_rest_user'):
             self.siodb_REST_user = config.get('sio_inv', 'siodb_rest_user')
         else:
@@ -83,20 +89,20 @@ class SioInventoryModule():
 
     def get_url(self, table_name):
 
-        url = '{}://{}:{}@{}:{}/databases/sioinv/tables/{}/rows'.format(
+        url = '{}://{}:{}@{}:{}/databases/{}/tables/{}/rows'.format(
                             self.siodb_REST_protocol,
                             self.siodb_REST_user,
                             self.siodb_REST_token,
                             self.siodb_REST_IP,
                             self.siodb_REST_port,
+                            self.siodb_REST_database_name,
                             table_name
                             )
+        #print(url)
 
         response = requests.get(url, verify = self.siodb_REST_TLS_verify_certificate)
         if response.status_code != 200:
             print('ERROR GET {}'.format(response.status_code))
-
-        #print(response.json())
 
         return response.json()
 
